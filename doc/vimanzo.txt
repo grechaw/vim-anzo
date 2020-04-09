@@ -19,3 +19,7 @@ CONTENTS                                                            *vimanzo*
 
 ==============================================================================
 2. Prerequisites                                      *vimanzo-prerequisites*
+
+TODO
+g:anzo_command
+g:anzo_settings
