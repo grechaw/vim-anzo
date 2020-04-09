@@ -1,0 +1,9 @@
+PREFIX gm: <http://cambridgesemantics.com/ontologies/Graphmarts#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+SELECT ?t
+WHERE
+{
+ ?x a gm:Graphmart ;
+   dc:title ?t    .
+}
+

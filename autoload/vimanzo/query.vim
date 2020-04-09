@@ -18,12 +18,22 @@ if !exists("g:anzo_command")
 endif
 
 if !exists("g:anzo_settings")
-    let g:anzo_command = "~/.anzo/settings.trig"
+    let g:anzo_settings = "~/.anzo/settings.trig"
 endif
 
-function! ExecuteQuery()
+function! vimanzo#query#GetGraph(uri)
     silent !clear
-    execute "!" . g:anzo_command . " query -x " . g:anzo_settings . " " . bufname("%")
+    execute "!" . g:anzo_command . " get -z " . g:anzo_settings . " " . a:uri 
 endfunction
 
-nnoremap <buffer> <localleader>q :call ExecuteQuery()<cr>
+function! vimanzo#query#ExecuteJournalQuery()
+    silent !clear
+    execute "!" . g:anzo_command . " query -a -z " . g:anzo_settings . " -f " . bufname("%")
+endfunction
+
+function! vimanzo#query#ExecuteQuery()
+    silent !clear
+    execute "!" . g:anzo_command . " query -z " . g:anzo_settings . " -f " . bufname("%")
+endfunction
+
+nnoremap <buffer> <localleader>q :call vimanzo#query#ExecuteJournalQuery()<cr>

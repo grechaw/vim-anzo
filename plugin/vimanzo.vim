@@ -15,5 +15,4 @@ let s:plugin_vers = "-1"
 let s:plugin_dir = expand('<sfile>:p:h:h')
 
 call vimanzo#query#test()
-
 echom "Vimanzo Loaded"
