@@ -1,0 +1,21 @@
+*vimanzo.txt* A vim plugin for Anzo
+
+Vimanzo
+
+                        Version: -1
+
+==============================================================================
+CONTENTS                                                            *vimanzo*
+
+    1. Intro                         |vimanzo-intro|
+    2. Prerequisites                 |vimanzo-prerequisites|
+
+
+
+==============================================================================
+1. Intro                                                      *vimanzo-intro*
+
+
+
+==============================================================================
+2. Prerequisites                                      *vimanzo-prerequisites*
