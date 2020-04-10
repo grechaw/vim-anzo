@@ -26,10 +26,19 @@ function! vimanzo#query#GetGraph(uri)
     execute "!" . g:anzo_command . " get -z " . g:anzo_settings . " " . a:uri 
 endfunction
 
+
+"This function runs a query against the journal showing the results in a minibuffer
 function! vimanzo#query#ExecuteJournalQuery()
-    silent !clear
-    execute "!" . g:anzo_command . " query -a -z " . g:anzo_settings . " -f " . bufname("%")
+  let l:query_file = bufname("%")
+  silent! exe "noautocmd botright pedit QueryResults"
+  noautocmd wincmd P
+  set buftype=nofile
+  exec ":norm ggdG"
+  exec ": read ! " . g:anzo_command . " query -a -z " . g:anzo_settings . " -f " . l:query_file
+  noautocmd wincmd p
 endfunction
+
+com! JournalQuery :call vimanzo#query#ExecuteJournalQuery()
 
 function! vimanzo#query#ExecuteQuery()
     silent !clear
