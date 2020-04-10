@@ -14,5 +14,7 @@ let s:plugin_vers = "-1"
 " Get the directory the script is installed in
 let s:plugin_dir = expand('<sfile>:p:h:h')
 
-call vimanzo#query#test()
-echom "Vimanzo Loaded"
+" mappings
+nnoremap <buffer> <localleader>q :call vimanzo#query#ExecuteJournalQuery()<cr>
+
+" echom "Vimanzo loaded..."
