@@ -1,9 +1,19 @@
 PREFIX gm: <http://cambridgesemantics.com/ontologies/Graphmarts#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
-SELECT ?t
+PREFIX anzo: <http://openanzo.org/ontologies/2008/07/Anzo#>
+PREFIX va: <urn:vimanzo#>
+SELECT ?gm_uri ?gm_title ?layer_uri ?layer_title ?step_uri ?step_title
 WHERE
 {
- ?x a gm:Graphmart ;
-   dc:title ?t    .
+ ?gm_uri a gm:Graphmart ;
+        dc:title ?gm_title    ;
+        gm:layer ?item .
+ ?item anzo:index ?index ;
+       anzo:orderedValue ?layer_uri .
+ ?layer_uri dc:title ?layer_title ;
+       gm:step ?stepitem .
+ ?stepitem anzo:index ?stepIndex ;
+           anzo:orderedValue ?step_uri .
+ ?step_uri dc:title ?step_title .
 }
 
