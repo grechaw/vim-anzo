@@ -9,17 +9,55 @@ CONTENTS                                                            *vimanzo*
 
     1. Intro                         |vimanzo-intro|
     2. Prerequisites                 |vimanzo-prerequisites|
+    3. Syntax highlighting           |vimanzo-syntax|
+    4. Functionality                 |vimanzo-functionality|
+    5. Mappings                      |vimanzo-mappings|
 
 
 
 ==============================================================================
 1. Intro                                                      *vimanzo-intro*
 
+Vimanzo provides an interface in to the Anzo data integration platform.
+In addition to low-level services like submitting SPARQL queries to anzo,
+it also provides an interface for listing, configuring anzo assets and executing
+common Anzo operations.
+
+It is a work in progress.
+
+https://github.com/grechaw/vimanzo
 
 
 ==============================================================================
 2. Prerequisites                                      *vimanzo-prerequisites*
 
+The anzo CLI must be available.
+There must be an anzo settings.trig file available on the filesystem somewhere.
+To override the default locations for the anzo command and settings file, 
+put these in your .vimrc:
+
+let g:anzo_command="/path/to/anzo"
+let g:anzo_settings="/path/to/settings.trig"
+
+
+==============================================================================
+3. Syntax highlighting                                        *vimanzo-syntax*
+
 TODO
-g:anzo_command
-g:anzo_settings
+
+==============================================================================
+4. Functionality                                        *vimanzo-funcionality*
+
+find
+
+findSelectionSubject
+findSelectionPredicate
+findSelectionObject
+findSelectionLiteral
+
+query
+
+
+==============================================================================
+5. Mappings                                                 *vimanzo-mappings*
+

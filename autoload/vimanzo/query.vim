@@ -12,15 +12,6 @@ function! vimanzo#query#testCLI()
     echom "Query Test Anzo Connection"
 endfunction
 
-
-if !exists("g:anzo_command")
-    let g:anzo_command = "anzo"
-endif
-
-if !exists("g:anzo_settings")
-    let g:anzo_settings = "~/.anzo/settings.trig"
-endif
-
 function! vimanzo#query#GetGraph(uri)
     silent !clear
     execute "!" . g:anzo_command . " get -z " . g:anzo_settings . " " . a:uri 

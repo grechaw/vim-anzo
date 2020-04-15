@@ -14,6 +14,14 @@ let s:plugin_vers = "-1"
 " Get the directory the script is installed in
 let s:plugin_dir = expand('<sfile>:p:h:h')
 
+if !exists("g:anzo_command")
+    let g:anzo_command = "anzo"
+endif
+
+if !exists("g:anzo_settings")
+    let g:anzo_settings = "~/.anzo/settings.trig"
+endif
+
 " mappings
 nnoremap <buffer> <localleader>q :call vimanzo#query#ExecuteJournalQuery()<cr>
 
