@@ -2,6 +2,8 @@
 " vim:tabstop=2:shiftwidth=2:expandtab:textwidth=99
 " Vimanzo autoload plugin file
 " Desc: Query services
+"
+execute 'source ' . expand('<sfile>:p:h') . '/utilities.vim'
 
 if !exists("g:anzo_command")
   let g:anzo_command = "anzo"
@@ -23,7 +25,7 @@ endfunction
 
 function! vimanzo#query#ExecuteQuery(datasource, graphmart)
   let l:query_file = bufname("%")
-  silent! execute ":w<CR>"
+  silent! execute ":w"
   silent! exe "noautocmd botright pedit Query Results"
   noautocmd wincmd P
   set buftype=nofile
@@ -37,9 +39,24 @@ function! vimanzo#query#ExecuteQuery(datasource, graphmart)
   noautocmd wincmd p
 endfunction
 
+"FUNCTION: ExceuteQueryFromString
+"This function runs a query against a datasource and potentially graphmart
+"given the query string that it is passed.
+"@TODO the internals of this funciton are similar to ExecuteQuery if we need 
+"something similar again it might be worth abstracting them out to their own
+"function
+function! vimanzo#query#ExecuteQueryFromString(query, datasource, graphmart)
+  if a:datasource == "-a"
+    exec ": read ! " . g:anzo_command . " query -a -z " . g:anzo_settings . " " . a:query
+  else 
+    exec ":read ! " . g:anzo_command . " query -z " . g:anzo_settings . " -ds " . a:datasource . " -dataset " . a:graphmart . " " . a:query
+  endif
+endfunction
+
+
 nnoremap <buffer> <localleader>q :call vimanzo#query#ExecuteJournalQuery()<cr>
 
-function! vimanzo#query#DatasourceQuery()
+function! vimanzo#query#DatasourceQuery() 
   call vimanzo#query#ExecuteQuery(g:current_focused_azg, g:current_focused_graphmart)
 endfunction
 
@@ -52,35 +69,14 @@ let g:graphmart_uri_title_dictionary = {"-a;http://cambridgesemantics.com/dataso
 " Maybe we want to run this at initialization time and then allow 
 " for manual refresh
 function! vimanzo#query#GetGraphmartsInfo()
-  let l:raw_info = substitute(system("anzo query -a -ds http://cambridgesemantics.com/datasource/SystemTables  \"SELECT ?azg ?gmart (SAMPLE(?title) as ?label) WHERE { ?gmart <http://cambridgesemantics.com/ontologies/GraphmartStatus#status> ?status; a <http://cambridgesemantics.com/ontologies/GraphmartStatus#GraphmartStatus> ; dc:title ?title ; <http://cambridgesemantics.com/ontologies/Graphmarts#graphQueryEngineUri> ?azg } GROUP BY ?azg ?gmart \" -o csv"), '\n', ',' , 'g')
-  let l:within_quote = 0
-  let l:current_azg = "" 
-  let l:current_graphmart = ""
-  let l:current_item = ""
-  let l:column_headers = ""
-  for s:char in split(l:raw_info, '\zs') 
-    if s:char ==# "," && !l:within_quote 
-      if l:current_azg ==# ""
-        let l:current_azg = l:current_item 
-        let l:current_item = ""
-      elseif l:current_graphmart ==# ""
-        let l:current_graphmart = l:current_item 
-        let l:current_item = ""
-      else
-        if l:column_headers ==# "" 
-          let l:column_headers = l:current_graphmart
-        else
-          let g:graphmart_uri_title_dictionary[l:current_azg . ";" . l:current_graphmart] = l:current_item
-        endif 
-        let l:current_azg = "" 
-        let l:current_graphmart = ""
-        let l:current_item = "" 
-      endif
-    elseif s:char ==# "\"" 
-      let l:within_quote = !l:within_quote 
-    else 
-      let l:current_item = l:current_item . s:char 
-    endif 
+  let l:raw_info = system("anzo query -a -ds http://cambridgesemantics.com/datasource/SystemTables  \"SELECT ?azg ?gmart (SAMPLE(?title) as ?label) WHERE { ?gmart <http://cambridgesemantics.com/ontologies/GraphmartStatus#status> ?status; a <http://cambridgesemantics.com/ontologies/GraphmartStatus#GraphmartStatus> ; dc:title ?title ; <http://cambridgesemantics.com/ontologies/Graphmarts#graphQueryEngineUri> ?azg } GROUP BY ?azg ?gmart \" -o csv")
+  let l:csv = vimanzo#utilities#ParseStringToCSV(l:raw_info)
+  for s:row in l:csv[1]
+    let l:azg = s:row[0]
+    let l:graphmart = s:row[1]
+    let l:title = s:row[2]
+    let l:key = l:azg . ";" . l:graphmart
+    let g:graphmart_uri_title_dictionary[l:key] = l:title
   endfor
 endfunction
 
@@ -153,8 +149,6 @@ function! vimanzo#query#setAZGAndGraphmartInternal(run_query)
   if a:run_query ==# "run_query"
     call vimanzo#query#DatasourceQuery() 
   endif
-endfunction
-
 
 "This function executes a sparql query and unpacks the json
 "to reutrn the results as a vim structure
