@@ -2,6 +2,20 @@
 " Vimanzo autoload plugin file
 " Desc: Query services
 "
+execute 'source ' . expand('<sfile>:p:h') . '/utilities.vim'
+
+if !exists("g:anzo_command")
+  let g:anzo_command = "anzo"
+endif
+
+if !exists("g:anzo_settings")
+  let g:anzo_settings = "~/.anzo/settings.trig"
+endif
+
+function! vimanzo#query#GetGraph(uri)
+  silent !clear
+  execute "!" . g:anzo_command . " get -z " . g:anzo_settings . " " . a:uri 
+endfunction
 
 "This function runs a query against the journal showing the results in a minibuffer
 function! vimanzo#query#ExecuteJournalQuery()
@@ -140,14 +154,6 @@ function! vimanzo#query#setAZGAndGraphmartInternal(run_query)
   endif
 endfunction
 
-"This function executes a sparql query and unpacks the json
-"to reutrn the results as a vim structure
-function! vimanzo#query#internalQuery(fileName)
-  let l:query_file = g:vimanzo_plugin_dir . "/autoload/vimanzo/" . a:fileName
-  " Use json results and all graphs
-  return vimanzo#query#queryForVimInternal(l:query_file, 1, "") 
-endfunction
-
 "Function: A query function that takes either a filepath or a 
 "query string and returns a dictionary of the results
 function! vimanzo#query#queryForVimInternal(query_object, is_filepath, datasource) 
@@ -173,4 +179,4 @@ function! vimanzo#query#queryForVimInternal(query_object, is_filepath, datasourc
     endfor
   endfor
   return l:result_list
-endfunction
+endfunction 

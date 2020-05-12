@@ -1,3 +1,4 @@
+execute 'source ' . expand('<sfile>:p:h') . '/utilities.vim'
 execute 'source ' . expand('<sfile>:p:h') . '/query.vim'
 
 "GLOBAL: g:pipeline_uri_label_dictionary 
@@ -24,7 +25,4 @@ endfunction
 
 function FilterBufferByString(filter_string)
   call ":v/" . a:filter_string . "/d"
-endfunction
-      
-
-
+endfunction 
