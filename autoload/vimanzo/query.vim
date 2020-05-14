@@ -3,7 +3,6 @@
 " Vimanzo autoload plugin file
 " Desc: Query services
 "
-execute 'source ' . expand('<sfile>:p:h') . '/utilities.vim'
 
 if !exists("g:anzo_command")
   let g:anzo_command = "anzo"
@@ -69,14 +68,18 @@ let g:graphmart_uri_title_dictionary = {"-a;http://cambridgesemantics.com/dataso
 " Maybe we want to run this at initialization time and then allow 
 " for manual refresh
 function! vimanzo#query#GetGraphmartsInfo()
-  let l:raw_info = system("anzo query -a -ds http://cambridgesemantics.com/datasource/SystemTables  \"SELECT ?azg ?gmart (SAMPLE(?title) as ?label) WHERE { ?gmart <http://cambridgesemantics.com/ontologies/GraphmartStatus#status> ?status; a <http://cambridgesemantics.com/ontologies/GraphmartStatus#GraphmartStatus> ; dc:title ?title ; <http://cambridgesemantics.com/ontologies/Graphmarts#graphQueryEngineUri> ?azg } GROUP BY ?azg ?gmart \" -o csv")
-  let l:csv = vimanzo#utilities#ParseStringToCSV(l:raw_info)
-  for s:row in l:csv[1]
-    let l:azg = s:row[0]
-    let l:graphmart = s:row[1]
-    let l:title = s:row[2]
-    let l:key = l:azg . ";" . l:graphmart
-    let g:graphmart_uri_title_dictionary[l:key] = l:title
+  let l:datasource = "http://cambridgesemantics.com/datasource/SystemTables"
+  let l:select = "SELECT ?azg ?gmart (SAMPLE(?title) as ?label) \n"
+  let l:status = "?gmart <http://cambridgesemantics.com/ontologies/GraphmartStatus#status> ?status . \n"
+  let l:type   = "?gmart a <http://cambridgesemantics.com/ontologies/GraphmartStatus#GraphmartStatus>. \n "
+  let l:title  = "?gmart dc:title ?title . \n"
+  let l:azg    = "?gmart  <http://cambridgesemantics.com/ontologies/Graphmarts#graphQueryEngineUri> ?azg \n"
+  let l:where  = " WHERE { " . l:status . l:type . l:title . l:azg . " } GROUP BY ?azg ?gmart"
+  let l:query  = l:select . l:where 
+  let l:result_list = vimanzo#query#queryForVimInternal( l:query, 0, l:datasource)
+  for l:entry in l:result_list 
+    let l:key = l:entry["azg"] . ";" . l:entry["gmart"]
+    let g:graphmart_uri_title_dictionary[l:key] = l:entry["label"] 
   endfor
 endfunction
 
@@ -105,7 +108,7 @@ function! vimanzo#query#DisplayGraphmartsInternal(graphmart_set_command)
   setlocal bufhidden=hide
   setlocal noswapfile
   setlocal cursorline
-  silent execute ":nnoremap <buffer> <CR> :call " . a:graphmart_set_command . " ()<CR>"
+  silent execute ":nnoremap <buffer> <CR> :call " . a:graphmart_set_command . " <CR>"
   call vimanzo#query#GetGraphmartsInfo()
   let l:key_count = 0
   for s:key in keys(g:graphmart_uri_title_dictionary)
@@ -149,14 +152,28 @@ function! vimanzo#query#setAZGAndGraphmartInternal(run_query)
   if a:run_query ==# "run_query"
     call vimanzo#query#DatasourceQuery() 
   endif
+endfunction
 
 "This function executes a sparql query and unpacks the json
 "to reutrn the results as a vim structure
-function! vimanzo#query#queryForVim()
+function! vimanzo#query#queryForVimFromBuffer()
   let l:query_file = bufname("%")
   " Use json results and all graphs
+  return vimanzo#query#queryForVimInternal(l:query_file, 1, "") 
+endfunction
+
+"Function: A query function that takes either a filepath or a 
+"query string and returns a dictionary of the results
+function! vimanzo#query#queryForVimInternal(query_object, is_filepath, datasource) 
   let l:query_options="-a -o json"
-  let l:result_string=system(g:anzo_command . " query " . l:query_options . " -z " . g:anzo_settings . " -f " . l:query_file)
+  if a:datasource !=# ""
+    let l:query_options = l:query_options . " -ds " . a:datasource
+  endif
+  if a:is_filepath
+    let l:result_string=system(g:anzo_command . " query " . l:query_options . " -z " . g:anzo_settings . " -f " . a:query_object)
+  else 
+    let l:result_string=system(g:anzo_command . " query " . l:query_options . " -z " . g:anzo_settings  . " \"" . a:query_object . "\"" )
+  endif
   let l:result_list=json_decode(l:result_string)['results']['bindings']
   " prune type info
   for item in l:result_list
