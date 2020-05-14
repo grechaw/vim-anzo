@@ -3,7 +3,6 @@
 " Vimanzo autoload plugin file
 " Desc: Query services
 "
-
 if !exists("g:anzo_command")
   let g:anzo_command = "anzo"
 endif

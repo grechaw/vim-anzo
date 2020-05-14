@@ -24,7 +24,4 @@ endfunction
 
 function FilterBufferByString(filter_string)
   call ":v/" . a:filter_string . "/d"
-endfunction
-      
-
-
+endfunction 
