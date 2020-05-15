@@ -142,11 +142,10 @@ function! vimanzo#query#setAZGAndGraphmartInternal(run_query)
   endif
 endfunction
 
-
 "This function executes a sparql query and unpacks the json
 "to reutrn the results as a vim structure
-function! vimanzo#query#queryForVim()
-  let l:query_file = bufname("%")
+function! vimanzo#query#internalQuery(fileName)
+  let l:query_file = g:vimanzo_plugin_dir . "/autoload/vimanzo/" . a:fileName
   " Use json results and all graphs
   let l:query_options="-a -o json"
   let l:result_string=system(g:anzo_command . " query " . l:query_options . " -z " . g:anzo_settings . " -f " . l:query_file)
