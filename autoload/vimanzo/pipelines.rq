@@ -2,23 +2,22 @@ PREFIX etl: <http://cambridgesemantics.com/ontologies/ETL#>
 PREFIX sdi: <http://cambridgesemantics.com/ontologies/2015/08/SDIService#> 
 
 SELECT
-?dataset_name
+?etl_uri
+?project_uri
+?project_name
 ?job_uri
-?dsp
-?etl_engine_config
 ?job_name
 ?start_time
 ?end_time
 ?status
-?job_uri
 ?job_run
 WHERE
 {
-?dsp a etl:DatasetProject ;
-   etl:datasetName ?dataset_name ;
-   etl:engineConfig ?etl_engine_config .
+?project_uri a etl:DatasetProject ;
+   etl:datasetName ?project_name ;
+   etl:engineConfig ?etl_uri .
    OPTIONAL {
-       ?dsp etl:group/etl:item ?job_uri .
+       ?project_uri etl:group/etl:item ?job_uri .
        ?job_uri etl:completeJobNames ?job_name .
        ?job_uri a etl:Job ;
            etl:completeJobNames ?job_name ;
@@ -33,5 +32,6 @@ WHERE
            sdi:status ?status .
     }
 }
+ORDER BY ?project_uri ?job_uri
 
 
