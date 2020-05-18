@@ -61,5 +61,15 @@ License
 Bugs
 Contributing
 Changelog
+
+
+
 Credits
+
+Charles Greer
+Andrew Parisi
+
+For vim7 compatability, included JSONParse 
+https://www.vim.org/scripts/script.php?script_id=3446
+by Po Shan Cheah
 

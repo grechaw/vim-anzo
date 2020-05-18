@@ -1,3 +1,4 @@
+runtime 'plugins/vimanzo.vim'
 
 describe 'vimanzo#graph#getGraph'
   it 'a valid graph call'
