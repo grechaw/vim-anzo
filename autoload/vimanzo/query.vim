@@ -2,7 +2,6 @@
 " Vimanzo autoload plugin file
 " Desc: Query services
 
-
 "This function runs a query against the journal showing the results in a minibuffer
 function! vimanzo#query#ExecuteJournalQuery()
   call vimanzo#query#ExecuteQuery("-a","")
@@ -142,15 +141,19 @@ function! vimanzo#query#setAZGAndGraphmartInternal(run_query)
   endif
 endfunction
 
-
 "This function executes a sparql query and unpacks the json
 "to reutrn the results as a vim structure
-function! vimanzo#query#queryForVim()
-  let l:query_file = bufname("%")
+function! vimanzo#query#internalQuery(fileName)
+  let l:query_file = g:vimanzo_plugin_dir . "/autoload/vimanzo/" . a:fileName
   " Use json results and all graphs
   let l:query_options="-a -o json"
   let l:result_string=system(g:anzo_command . " query " . l:query_options . " -z " . g:anzo_settings . " -f " . l:query_file)
-  let l:result_list=json_decode(l:result_string)['results']['bindings']
+  if v:version < 800
+      source plugin/parsejson.vim
+      let l:result_list=ParseJSON(l:result_string)['results']['bindings']
+  else
+      let l:result_list=json_decode(l:result_string)['results']['bindings']
+  endif
   " prune type info
   for item in l:result_list
     for key in keys(item)

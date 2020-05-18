@@ -18,9 +18,10 @@ endif
 
 
 " Set to version number for release, otherwise -1 for dev-branch
-let s:plugin_vers = "-1"
+let g:plugin_version = "-1"
 "
 " Get the directory the script is installed in
-let s:plugin_dir = expand('<sfile>:p:h:h')
+let g:vimanzo_plugin_dir = expand('<sfile>:p:h:h')
+
 
 " echom "Vimanzo loaded..."

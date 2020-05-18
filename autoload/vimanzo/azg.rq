@@ -1,0 +1,9 @@
+PREFIX system: <http://openanzo.org/ontologies/2008/07/System#> 
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+SELECT ?azg_uri ?azg_title
+WHERE
+{
+ ?azg_uri a system:GqeDatasource ;
+        dc:title ?azg_title    .
+}
+

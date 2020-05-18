@@ -1,0 +1,35 @@
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+
+SELECT
+?model_uri
+?model_title
+?class_uri
+?class_title
+?prop_uri
+?prop_title
+?prop_range
+{
+graph ?model_uri
+    {
+     ?model_uri a owl:Ontology ;
+            dc:title ?model_title    .
+     FILTER NOT EXISTS {
+        ?model_uri anzo:isSystem "true"^^xsd:boolean
+     }
+     ?class_uri a owl:Class ;
+           rdfs:label ?class_title .
+     { ?prop_uri a owl:DatatypeProperty }
+     UNION
+     { ?prop_uri a owl:ObjectPoperty }
+     ?prop_uri rdfs:label ?prop_title ;
+           rdfs:domain ?class_uri ;
+           rdfs:range ?prop_range .
+    }
+}
+ORDER BY ?model_uri 
+#?class_uri ?prop_uri
+
