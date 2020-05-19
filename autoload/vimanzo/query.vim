@@ -88,37 +88,17 @@ endfunction
 "dictionary and allows the user to set the 
 "currently focused graphmart 
 function! vimanzo#query#DisplayGraphmartsWithoutQuery() 
-  call vimanzo#query#DisplayGraphmartsInternal("vimanzo#query#setAZGAndGraphmart()")
-endfunction
-
-function! vimanzo#query#DisplayGraphmartsAndQuery()
-  call vimanzo#query#DisplayGraphmartsInternal("vimanzo#query#setAZGAndGraphmartWithQuery()")
-endfunction
-
-"This is abstracted out so that we can either
-"display and set the focused graphmart without 
-"running a query or run a query after that graphmart is 
-"set.
-function! vimanzo#query#DisplayGraphmartsInternal(graphmart_set_command) 
-  silent! execute "topleft vertical 31 new" 
-  noautocmd wincmd h
-  silent! execute "edit Active Graphmarts" 
-  silent! execute "normal ggdGd$"
-  setlocal buftype=nofile
-  setlocal bufhidden=hide
-  setlocal noswapfile
-  setlocal cursorline
-  silent execute ":nnoremap <buffer> <CR> :call " . a:graphmart_set_command . " <CR>"
   call vimanzo#query#GetGraphmartsInfo()
-  let l:key_count = 0
-  for s:key in keys(g:graphmart_uri_title_dictionary)
-    let l:graphmart_title = g:graphmart_uri_title_dictionary[s:key] 
-    if l:key_count > 0 
-      execute "normal! o \<Esc>" 
-    endif
-    execute "normal! i" . l:graphmart_title . "\<Esc>"
-    let l:key_count = l:key_count + 1 
-  endfor
+  call vimanzo#utilities#CreateSidebar(g:graphmart_uri_title_dictionary, "query", "Active Graphmarts")
+endfunction
+
+function! vimanzo#query#DisplayGraphmartsAndQuery() 
+  call vimanzo#query#GetGraphmartsInfo()
+  call vimanzo#utilities#CreateSidebar(g:graphmart_uri_title_dictionary, "query", "Active Graphmarts")
+endfunction
+
+function! vimanzo#query#GenerateBindings() 
+  silent execute ":nnoremap <buffer> <CR> :call  vimanzo#query#setAZGAndGraphmartWithQuery() <CR>"
 endfunction
 
 let g:current_focused_azg = ""
@@ -137,9 +117,9 @@ endfunction
 function! vimanzo#query#setAZGAndGraphmartInternal(run_query)
   let l:line  = getline('.')
   let l:unparsed_dictionary_azg = ""
-  for s:key in keys(g:graphmart_uri_title_dictionary)
+  for s:key in keys(g:graphmart_uri_title_dictionary) 
     let l:graphmart_title = g:graphmart_uri_title_dictionary[s:key]
-    if l:line ==# l:graphmart_title . " " "this is a little hacky, but somewhere a space gets inserted
+    if l:line ==# l:graphmart_title
       let l:unparsed_dictionary_azg = s:key
     endif
   endfor
