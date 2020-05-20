@@ -10,7 +10,6 @@ SELECT
 ?start_time
 ?end_time
 ?status
-?job_run
 WHERE
 {
 ?project_uri a etl:DatasetProject ;
@@ -31,7 +30,13 @@ WHERE
        ?job_run sdi:jobEndTime ?end_time ;
            sdi:status ?status .
     }
+    BIND(COALESCE(?job_uri,"") as ?job_uri)
+    BIND(COALESCE(?job_name,"no job history") as ?job_name)
+    BIND(COALESCE(?job_run,"") as ?job_name)
+    BIND(COALESCE(?start_time,"") as ?start_time)
+    BIND(COALESCE(?end_time,"") as ?end_time)
+    BIND(COALESCE(?status,"") as ?status)
 }
-ORDER BY ?project_uri ?job_uri
+ORDER BY ?project_uri desc(?end_time)
 
 
