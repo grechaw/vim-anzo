@@ -1,3 +1,4 @@
+"
 " vim:tabstop=2:shiftwidth=2:expandtab:textwidth=99
 " Vimanzo autoload plugin file
 " Desc: Query services
@@ -78,7 +79,7 @@ function! vimanzo#query#GetGraphmartsInfo()
   let l:azg    = "?gmart  <http://cambridgesemantics.com/ontologies/Graphmarts#graphQueryEngineUri> ?azg \n"
   let l:where  = " WHERE { " . l:status . l:type . l:title . l:azg . " } GROUP BY ?azg ?gmart"
   let l:query  = l:select . l:where 
-  let l:result_list = vimanzo#query#queryForVimInternal( l:query, 0, l:datasource)
+  let l:result_list = vimanzo#query#internalQuery( l:query, 0, l:datasource)
   for l:entry in l:result_list 
     let l:key = l:entry["azg"] . ";" . l:entry["gmart"]
     let g:graphmart_uri_title_dictionary[l:key] = l:entry["label"] 
@@ -138,13 +139,14 @@ endfunction
 
 "Function: A query function that takes either a filepath or a 
 "query string and returns a dictionary of the results
-function! vimanzo#query#queryForVimInternal(query_object, is_filepath, datasource) 
+
+function! vimanzo#query#internalQuery(query_object, is_filepath, datasource) 
   let l:query_options="-a -o json"
   if a:datasource !=# ""
-    let l:query_options = l:query_options . " -ds " . a:datasource
+    let l:query_options = l:query_options . " -ds " . a:datasource 
   endif
-  if a:is_filepath
-    let l:result_string=system(g:anzo_command . " query " . l:query_options . " -z " . g:anzo_settings . " -f " . l:query_file)
+  if a:is_filepath 
+    let l:result_string=system(g:anzo_command . " query " . l:query_options . " -z " . g:anzo_settings . " -f " . a:query_object)
   else 
     let l:result_string=system(g:anzo_command . " query " . l:query_options . " -z " . g:anzo_settings  . " \"" . a:query_object . "\"" )
   endif 

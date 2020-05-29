@@ -27,7 +27,7 @@ function! vimanzo#pipelines#getPipelineInfo()
   let l:pipeline_title = "?pipeline dc:title ?title ."
   let l:where_clause = " WHERE { " . l:pipeline_type . l:pipeline_title . " } GROUP BY ?pipeline"
   let l:query = l:select . l:where_clause
-  let l:result_list = vimanzo#query#queryForVimInternal(l:query, 0, "")
+  let l:result_list = vimanzo#query#internalQuery(l:query, 0, "")
   for l:entry in l:result_list
     let l:key = l:entry["pipeline"]
     let g:pipeline_uri_label_dictionary[l:key] = l:entry["label"]
@@ -134,7 +134,7 @@ function! vimanzo#pipelines#GetJobsForPipeline(pipeline_uri)
   let l:item  =  "?group etl:item ?job . \n"
   let l:where = "WHERE { " . l:type . l:group . l:item . " } " 
   let l:query = l:etl_prefix . l:select  . l:where 
-  return vimanzo#query#queryForVimInternal(l:query, 0, "")
+  return vimanzo#query#internalQuery(l:query, 0, "")
 endfunction
 
 "FUNCTION: GeneratePipelinePayload

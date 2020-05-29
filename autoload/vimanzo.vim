@@ -1,5 +1,8 @@
 
 function! vimanzo#Overview()
+    " We have an internal function in utitities.vim that might handle this 
+    " if not we should add one. Do we want this in the bottom right - it might
+    " be easier to use if it's a full tab of it's own. 
     silent! exec "noautocmd botright pedit Anzo Overview"
     noautocmd wincmd P
     set buftype=nofile

@@ -1,6 +1,6 @@
 function! vimanzo#internal#AppendAnzograph()
     let l:report = []
-    let l:azg = vimanzo#query#internalQuery("azg.rq")
+    let l:azg = vimanzo#query#internalQuery("azg.rq", 1, "")
     for item in l:azg
         call add(l:report, item["azg_title"] . "\t <" . item["azg_uri"] . ">")
     endfor
@@ -10,7 +10,7 @@ endfunction
 
 function! vimanzo#internal#AppendGraphmarts()
     let l:report = []
-    let l:graphmarts = vimanzo#query#internalQuery("graphmarts.rq")
+    let l:graphmarts = vimanzo#query#internalQuery("graphmarts.rq", 1, "")
     let l:last_gm = ""
     let l:last_layer = ""
     for item in l:graphmarts
@@ -32,7 +32,7 @@ endfunction
 
 function! vimanzo#internal#AppendPipelines()
     let l:report = []
-    let l:pipelines = vimanzo#query#internalQuery("pipelines.rq")
+    let l:pipelines = vimanzo#query#internalQuery("pipelines.rq", 1, "")
     let l:last_project = ""
     let l:last_job = ""
     for item in l:pipelines
@@ -54,7 +54,7 @@ endfunction
 
 function! vimanzo#internal#AppendModels()
     let l:report = []
-    let l:models = vimanzo#query#internalQuery("models.rq")
+    let l:models = vimanzo#query#internalQuery("models.rq", 1, "")
     let l:last_model = ""
     let l:last_class = ""
     let l:last_prop = ""
