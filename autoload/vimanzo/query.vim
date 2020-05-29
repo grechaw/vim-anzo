@@ -4,6 +4,8 @@
 "
 execute 'source ' . expand('<sfile>:p:h') . '/utilities.vim'
 
+execute 'source ' . expand('<sfile>:p:h') . '/utilities.vim'
+
 if !exists("g:anzo_command")
   let g:anzo_command = "anzo"
 endif

@@ -23,7 +23,8 @@ let g:pipeline_uri_label_dictionary = {}
 "pane 
 function! vimanzo#pipelines#getPipelineInfo() 
   let l:select = "SELECT DISTINCT ?pipeline (SAMPLE(?title) as ?label) "
-  let l:pipeline_type = "?pipeline a <http://cambridgesemantics.com/ontologies/ETL#Project> ." let l:pipeline_title = "?pipeline dc:title ?title ."
+  let l:pipeline_type = "?pipeline a <http://cambridgesemantics.com/ontologies/ETL#Project> ."
+  let l:pipeline_title = "?pipeline dc:title ?title ."
   let l:where_clause = " WHERE { " . l:pipeline_type . l:pipeline_title . " } GROUP BY ?pipeline"
   let l:query = l:select . l:where_clause
   let l:result_list = vimanzo#query#queryForVimInternal(l:query, 0, "")
@@ -181,5 +182,4 @@ function! vimanzo#pipelines#CallRunPipelineSemanticService(pipeline_filename)
   let l:service_uri = l:sdi_prefix . "runETLTransformation" 
   echom "! " . g:anzo_command . " call -z " . g:anzo_settings . " " . l:service_uri . " " . a:pipeline_filename 
   execute "! " . g:anzo_command . " call -z " . g:anzo_settings . " " . l:service_uri . " " . a:pipeline_filename
-endfunction
-
+endfunction 
