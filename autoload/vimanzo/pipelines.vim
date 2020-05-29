@@ -4,7 +4,7 @@ execute 'source ' . expand('<sfile>:p:h') . '/query.vim'
 "This global hols the URI for the etl engine 
 "that is used for running pipelines
 
-let g:etl_engine_uri = "http://cambridgesemantics.com/Sparkler_Engine_Config/82965bd0f44911e9a7132a2ae2dbcce4"
+let g:etl_engine_uri = "http://cambridgesemantics.com/SparkEngineConfig/8bf6d1ca210149569b7a691e5af3712f"
 
 if !exists("g:etl_engine_uri")
   let g:etl_engine_uri = input("Enter the URI of your ETL Engine, e.g. spark, sparkler: ")
