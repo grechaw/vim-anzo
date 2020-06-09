@@ -4,7 +4,7 @@ execute 'source ' . expand('<sfile>:p:h') . '/query.vim'
 "This global hols the URI for the etl engine 
 "that is used for running pipelines
 
-let g:etl_engine_uri = "http://cambridgesemantics.com/SparkEngineConfig/8bf6d1ca210149569b7a691e5af3712f"
+let g:etl_engine_uri = "http://cambridgesemantics.com/Sparkler_Engine_Config/82965bd0f44911e9a7132a2ae2dbcce4"
 
 if !exists("g:etl_engine_uri")
   let g:etl_engine_uri = input("Enter the URI of your ETL Engine, e.g. spark, sparkler: ")
@@ -117,10 +117,11 @@ endfunction
 "RunSelectedPipelines
 function! vimanzo#pipelines#RunPipeline(pipeline_uri, pipeline_label)
   let l:jobs = vimanzo#pipelines#GetJobsForPipeline(a:pipeline_uri)
-  let l:pipeline_filename = "run_pipeline_" . substitute(a:pipeline_label, " ", "_", "g") . ".trig"
+  let l:pipeline_filename =   "run_pipeline_" . substitute(a:pipeline_label, " ", "_", "g") . ".trig"
   call vimanzo#pipelines#GeneratePipelinePayload(l:jobs, l:pipeline_filename)
-  call vimanzo#pipelines#CallRunPipelineSemanticService(l:pipeline_filename)
-"  call vimanzo#pipelines#MonitorJobs()
+  execute ":normal I Beginning run for " . a:pipeline_label
+"  call vimanzo#pipelines#CallRunPipelineSemanticService(l:pipeline_filename)
+  call vimanzo#pipelines#MonitorJobs(a:pipeline_label)
 endfunction 
 
 "FUNCTION: GetJobsForPipeline
@@ -178,8 +179,11 @@ endfunction
 "This includes generating and compiling the scala code 
 "that spark runs. 
 function! vimanzo#pipelines#CallRunPipelineSemanticService(pipeline_filename)
-  let l:sdi_prefix =  "http://cambridgesemantics.com/semanticServices/SDIService#"
+  let l:sdi_prefix =  "http://cambridgesemantics.com/semanticServices/SDIService\\#"
   let l:service_uri = l:sdi_prefix . "runETLTransformation" 
-  echom "! " . g:anzo_command . " call -z " . g:anzo_settings . " " . l:service_uri . " " . a:pipeline_filename 
-  execute "! " . g:anzo_command . " call -z " . g:anzo_settings . " " . l:service_uri . " " . a:pipeline_filename
+  execute "! " . g:anzo_command . " call -z " . g:anzo_settings . " \"" . l:service_uri . "\" " . a:pipeline_filename
 endfunction 
+
+function vimanzo#pipelines#MonitorJobs(pipeline_label)
+  execute ":normal o Monitoring the status of " . a:pipeline_label . "..."
+endfunction
