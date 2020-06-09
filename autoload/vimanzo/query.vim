@@ -5,8 +5,6 @@
 "
 execute 'source ' . expand('<sfile>:p:h') . '/utilities.vim'
 
-execute 'source ' . expand('<sfile>:p:h') . '/utilities.vim'
-
 if !exists("g:anzo_command")
   let g:anzo_command = "anzo"
 endif
@@ -151,16 +149,15 @@ function! vimanzo#query#internalQuery(query_object, is_filepath, datasource)
     let l:result_string=system(g:anzo_command . " query " . l:query_options . " -z " . g:anzo_settings  . " \"" . a:query_object . "\"" )
   endif 
   if v:version < 800
-      source plugin/parsejson.vim
-      let l:result_list=ParseJSON(l:result_string)['results']['bindings']
+    let l:result_list=vimanzo#utilities#ParseStringToCSV(l:result_string)
   else
-      let l:result_list=json_decode(l:result_string)['results']['bindings']
-  endif
-  " prune type info
-  for item in l:result_list
-    for key in keys(item)
-      let item[key] = item[key]["value"]
+    let l:result_list=json_decode(l:result_string)['results']['bindings']
+    " prune type info
+    for item in l:result_list
+      for key in keys(item)
+        let item[key] = item[key]["value"]
+      endfor
     endfor
-  endfor
+  endif 
   return l:result_list
 endfunction 
