@@ -118,9 +118,11 @@ endfunction
 function! vimanzo#query#setAZGAndGraphmartInternal(run_query)
   let l:line  = getline('.')
   let l:unparsed_dictionary_azg = ""
+  let l:clean_line = substitute(l:line, '\s*$', '', '')
   for s:key in keys(g:graphmart_uri_title_dictionary) 
     let l:graphmart_title = g:graphmart_uri_title_dictionary[s:key]
-    if l:line ==# l:graphmart_title
+    let l:clean_graphmart_title = substitute(l:graphmart_title, '\s*$', '', '') 
+    if l:clean_line ==# l:clean_graphmart_title
       let l:unparsed_dictionary_azg = s:key
     endif
   endfor
@@ -128,6 +130,8 @@ function! vimanzo#query#setAZGAndGraphmartInternal(run_query)
     let l:azg_graphmart_list = split(l:unparsed_dictionary_azg, ";")
     let g:current_focused_azg = l:azg_graphmart_list[0]
     let g:current_focused_graphmart = l:azg_graphmart_list[1]
+  else 
+    echoerr "Could not find graphmart associated with " . l:line
   endif 
   execute ":q \"Active Graphmarts\"<CR>"
   if a:run_query ==# "run_query"
