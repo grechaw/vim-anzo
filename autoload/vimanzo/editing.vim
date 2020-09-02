@@ -16,5 +16,5 @@ function! vimanzo#editing#GeneratePrefix()
   let l:replacement = input("Enter the string you would like your prefix to replace: ")
   let l:sed_replacement = substitute(l:replacement, '/', '\\/', 'g')
   execute ":%s/<" . l:sed_replacement . "\\(.*\\)>/". l:prefix . ":\\1/g"
-  execute ":normal ggOPREFIX ". l:prefix . ":" . "<" . l:replacement . ">."
+  execute ":normal ggOPREFIX ". l:prefix . ":" . "<" . l:replacement . "> "
 endfunction
