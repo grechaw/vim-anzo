@@ -1,0 +1,41 @@
+PREFIX etl: <http://cambridgesemantics.com/ontologies/ETL#>
+PREFIX sdi: <http://cambridgesemantics.com/ontologies/2015/08/SDIService#> 
+
+SELECT
+?etl_uri
+?project_uri
+?project_name
+?job_uri
+?job_name
+?start_time
+?end_time
+?status
+WHERE
+{
+?project_uri a etl:DatasetProject ;
+   etl:datasetName ?project_name ;
+   etl:engineConfig ?etl_uri .
+   OPTIONAL {
+       ?project_uri etl:group/etl:item ?job_uri .
+       ?job_uri etl:completeJobNames ?job_name .
+       ?job_uri a etl:Job ;
+           etl:completeJobNames ?job_name ;
+           etl:jobRun ?job_run .
+       ?job_run a ?jrt ;
+    }
+    OPTIONAL {
+       ?job_run sdi:jobStartTime ?start_time ;
+    }
+    OPTIONAL {
+       ?job_run sdi:jobEndTime ?end_time ;
+           sdi:status ?status .
+    }
+    BIND(COALESCE(?job_uri,"") as ?job_uri)
+    BIND(COALESCE(?job_name,"no job history") as ?job_name)
+    BIND(COALESCE(?start_time,"") as ?start_time)
+    BIND(COALESCE(?end_time,"") as ?end_time)
+    BIND(COALESCE(?status,"") as ?status)
+}
+ORDER BY ?project_uri 
+
+
