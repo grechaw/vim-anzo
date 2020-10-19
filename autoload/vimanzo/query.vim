@@ -1,6 +1,22 @@
+"
 " vim:tabstop=2:shiftwidth=2:expandtab:textwidth=99
 " Vimanzo autoload plugin file
 " Desc: Query services
+"
+execute 'source ' . expand('<sfile>:p:h') . '/utilities.vim'
+
+if !exists("g:anzo_command")
+  let g:anzo_command = "anzo"
+endif
+
+if !exists("g:anzo_settings")
+  let g:anzo_settings = "~/.anzo/settings.trig"
+endif
+
+function! vimanzo#query#GetGraph(uri)
+  silent !clear
+  execute "!" . g:anzo_command . " get -z " . g:anzo_settings . " " . a:uri 
+endfunction
 
 "This function runs a query against the journal showing the results in a minibuffer
 function! vimanzo#query#ExecuteJournalQuery()
@@ -9,7 +25,7 @@ endfunction
 
 function! vimanzo#query#ExecuteQuery(datasource, graphmart)
   let l:query_file = bufname("%")
-  silent! execute ":w<CR>"
+  silent! execute ":w"
   silent! exe "noautocmd botright pedit Query Results"
   noautocmd wincmd P
   set buftype=nofile
@@ -23,9 +39,24 @@ function! vimanzo#query#ExecuteQuery(datasource, graphmart)
   noautocmd wincmd p
 endfunction
 
+"FUNCTION: ExceuteQueryFromString
+"This function runs a query against a datasource and potentially graphmart
+"given the query string that it is passed.
+"@TODO the internals of this funciton are similar to ExecuteQuery if we need 
+"something similar again it might be worth abstracting them out to their own
+"function
+function! vimanzo#query#ExecuteQueryFromString(query, datasource, graphmart)
+  if a:datasource == "-a"
+    exec ": read ! " . g:anzo_command . " query -a -z " . g:anzo_settings . " " . a:query
+  else 
+    exec ":read ! " . g:anzo_command . " query -z " . g:anzo_settings . " -ds " . a:datasource . " -dataset " . a:graphmart . " " . a:query
+  endif
+endfunction
+
+
 nnoremap <buffer> <localleader>q :call vimanzo#query#ExecuteJournalQuery()<cr>
 
-function! vimanzo#query#DatasourceQuery()
+function! vimanzo#query#DatasourceQuery() 
   call vimanzo#query#ExecuteQuery(g:current_focused_azg, g:current_focused_graphmart)
 endfunction
 
@@ -38,35 +69,18 @@ let g:graphmart_uri_title_dictionary = {"-a;http://cambridgesemantics.com/dataso
 " Maybe we want to run this at initialization time and then allow 
 " for manual refresh
 function! vimanzo#query#GetGraphmartsInfo()
-  let l:raw_info = substitute(system("anzo query -a -ds http://cambridgesemantics.com/datasource/SystemTables  \"SELECT ?azg ?gmart (SAMPLE(?title) as ?label) WHERE { ?gmart <http://cambridgesemantics.com/ontologies/GraphmartStatus#status> ?status; a <http://cambridgesemantics.com/ontologies/GraphmartStatus#GraphmartStatus> ; dc:title ?title ; <http://cambridgesemantics.com/ontologies/Graphmarts#graphQueryEngineUri> ?azg } GROUP BY ?azg ?gmart \" -o csv"), '\n', ',' , 'g')
-  let l:within_quote = 0
-  let l:current_azg = "" 
-  let l:current_graphmart = ""
-  let l:current_item = ""
-  let l:column_headers = ""
-  for s:char in split(l:raw_info, '\zs') 
-    if s:char ==# "," && !l:within_quote 
-      if l:current_azg ==# ""
-        let l:current_azg = l:current_item 
-        let l:current_item = ""
-      elseif l:current_graphmart ==# ""
-        let l:current_graphmart = l:current_item 
-        let l:current_item = ""
-      else
-        if l:column_headers ==# "" 
-          let l:column_headers = l:current_graphmart
-        else
-          let g:graphmart_uri_title_dictionary[l:current_azg . ";" . l:current_graphmart] = l:current_item
-        endif 
-        let l:current_azg = "" 
-        let l:current_graphmart = ""
-        let l:current_item = "" 
-      endif
-    elseif s:char ==# "\"" 
-      let l:within_quote = !l:within_quote 
-    else 
-      let l:current_item = l:current_item . s:char 
-    endif 
+  let l:datasource = "http://cambridgesemantics.com/datasource/SystemTables"
+  let l:select = "SELECT ?azg ?gmart (SAMPLE(?title) as ?label) \n"
+  let l:status = "?gmart <http://cambridgesemantics.com/ontologies/GraphmartStatus#status> ?status . \n"
+  let l:type   = "?gmart a <http://cambridgesemantics.com/ontologies/GraphmartStatus#GraphmartStatus>. \n "
+  let l:title  = "?gmart dc:title ?title . \n"
+  let l:azg    = "?gmart  <http://cambridgesemantics.com/ontologies/Graphmarts#graphQueryEngineUri> ?azg \n"
+  let l:where  = " WHERE { " . l:status . l:type . l:title . l:azg . " } GROUP BY ?azg ?gmart"
+  let l:query  = l:select . l:where 
+  let l:result_list = vimanzo#query#internalQuery( l:query, 0, l:datasource)
+  for l:entry in l:result_list 
+    let l:key = l:entry["azg"] . ";" . l:entry["gmart"]
+    let g:graphmart_uri_title_dictionary[l:key] = l:entry["label"] 
   endfor
 endfunction
 
@@ -75,37 +89,17 @@ endfunction
 "dictionary and allows the user to set the 
 "currently focused graphmart 
 function! vimanzo#query#DisplayGraphmartsWithoutQuery() 
-  call vimanzo#query#DisplayGraphmartsInternal("vimanzo#query#setAZGAndGraphmart()")
-endfunction
-
-function! vimanzo#query#DisplayGraphmartsAndQuery()
-  call vimanzo#query#DisplayGraphmartsInternal("vimanzo#query#setAZGAndGraphmartWithQuery()")
-endfunction
-
-"This is abstracted out so that we can either
-"display and set the focused graphmart without 
-"running a query or run a query after that graphmart is 
-"set.
-function! vimanzo#query#DisplayGraphmartsInternal(graphmart_set_command) 
-  silent! execute "topleft vertical 31 new" 
-  noautocmd wincmd h
-  silent! execute "edit Active Graphmarts" 
-  silent! execute "normal ggdGd$"
-  setlocal buftype=nofile
-  setlocal bufhidden=hide
-  setlocal noswapfile
-  setlocal cursorline
-  silent execute ":nnoremap <buffer> <CR> :call " . a:graphmart_set_command . " ()<CR>"
   call vimanzo#query#GetGraphmartsInfo()
-  let l:key_count = 0
-  for s:key in keys(g:graphmart_uri_title_dictionary)
-    let l:graphmart_title = g:graphmart_uri_title_dictionary[s:key] 
-    if l:key_count > 0 
-      execute "normal! o \<Esc>" 
-    endif
-    execute "normal! i" . l:graphmart_title . "\<Esc>"
-    let l:key_count = l:key_count + 1 
-  endfor
+  call vimanzo#utilities#CreateSidebar(g:graphmart_uri_title_dictionary, "query", "Active Graphmarts")
+endfunction
+
+function! vimanzo#query#DisplayGraphmartsAndQuery() 
+  call vimanzo#query#GetGraphmartsInfo()
+  call vimanzo#utilities#CreateSidebar(g:graphmart_uri_title_dictionary, "query", "Active Graphmarts")
+endfunction
+
+function! vimanzo#query#GenerateBindings() 
+  silent execute ":nnoremap <buffer> <CR> :call  vimanzo#query#setAZGAndGraphmartWithQuery() <CR>"
 endfunction
 
 let g:current_focused_azg = ""
@@ -124,9 +118,11 @@ endfunction
 function! vimanzo#query#setAZGAndGraphmartInternal(run_query)
   let l:line  = getline('.')
   let l:unparsed_dictionary_azg = ""
-  for s:key in keys(g:graphmart_uri_title_dictionary)
+  let l:clean_line = substitute(l:line, '\s*$', '', '')
+  for s:key in keys(g:graphmart_uri_title_dictionary) 
     let l:graphmart_title = g:graphmart_uri_title_dictionary[s:key]
-    if l:line ==# l:graphmart_title . " " "this is a little hacky, but somewhere a space gets inserted
+    let l:clean_graphmart_title = substitute(l:graphmart_title, '\s*$', '', '') 
+    if l:clean_line ==# l:clean_graphmart_title
       let l:unparsed_dictionary_azg = s:key
     endif
   endfor
@@ -134,6 +130,8 @@ function! vimanzo#query#setAZGAndGraphmartInternal(run_query)
     let l:azg_graphmart_list = split(l:unparsed_dictionary_azg, ";")
     let g:current_focused_azg = l:azg_graphmart_list[0]
     let g:current_focused_graphmart = l:azg_graphmart_list[1]
+  else 
+    echoerr "Could not find graphmart associated with " . l:line
   endif 
   execute ":q \"Active Graphmarts\"<CR>"
   if a:run_query ==# "run_query"
@@ -141,24 +139,29 @@ function! vimanzo#query#setAZGAndGraphmartInternal(run_query)
   endif
 endfunction
 
-"This function executes a sparql query and unpacks the json
-"to reutrn the results as a vim structure
-function! vimanzo#query#internalQuery(fileName)
-  let l:query_file = g:vimanzo_plugin_dir . "/autoload/vimanzo/" . a:fileName
-  " Use json results and all graphs
+"Function: A query function that takes either a filepath or a 
+"query string and returns a dictionary of the results
+
+function! vimanzo#query#internalQuery(query_object, is_filepath, datasource) 
   let l:query_options="-a -o json"
-  let l:result_string=system(g:anzo_command . " query " . l:query_options . " -z " . g:anzo_settings . " -f " . l:query_file)
-  if v:version < 800
-      source plugin/parsejson.vim
-      let l:result_list=ParseJSON(l:result_string)['results']['bindings']
-  else
-      let l:result_list=json_decode(l:result_string)['results']['bindings']
+  if a:datasource !=# ""
+    let l:query_options = l:query_options . " -ds " . a:datasource 
   endif
-  " prune type info
-  for item in l:result_list
-    for key in keys(item)
-      let item[key] = item[key]["value"]
+  if a:is_filepath 
+    let l:result_string=system(g:anzo_command . " query " . l:query_options . " -z " . g:anzo_settings . " -f " . a:query_object)
+  else 
+    let l:result_string=system(g:anzo_command . " query " . l:query_options . " -z " . g:anzo_settings  . " \"" . a:query_object . "\"" )
+  endif 
+  if v:version < 800
+    let l:result_list=vimanzo#utilities#ParseStringToCSV(l:result_string)
+  else
+    let l:result_list=json_decode(l:result_string)['results']['bindings']
+    " prune type info
+    for item in l:result_list
+      for key in keys(item)
+        let item[key] = item[key]["value"]
+      endfor
     endfor
-  endfor
+  endif 
   return l:result_list
-endfunction
+endfunction 
